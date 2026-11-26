@@ -5,6 +5,8 @@ const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
+const neuporabljena = 'namerna napaka linterja';
+
 const SKUPINE = ['prsa', 'hrbet', 'noge', 'ramena', 'roke', 'trebuh'];
 
 // Seznam vaj, neobvezen filter: /api/vaje?misicnaSkupina=prsa
