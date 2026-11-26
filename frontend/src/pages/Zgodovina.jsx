@@ -12,11 +12,6 @@ export default function Zgodovina() {
   const [napaka, setNapaka] = useState('')
 
   useEffect(() => {
-    setNalaganje(true)
-    setNapaka('')
-    setOdprt(null)
-    setPodrobnosti(null)
-
     fetch(`/api/treningi?stran=${stran}`)
       .then(async (res) => {
         const data = await res.json()
@@ -26,6 +21,15 @@ export default function Zgodovina() {
       .catch((err) => setNapaka(err.message))
       .finally(() => setNalaganje(false))
   }, [stran])
+
+  // ob menjavi strani ponastavimo prikaz, nalaganje pa sproži effect
+  function zamenjajStran(nova) {
+    setNalaganje(true)
+    setNapaka('')
+    setOdprt(null)
+    setPodrobnosti(null)
+    setStran(nova)
+  }
 
   async function onKlik(trening) {
     if (odprt === trening._id) {
@@ -105,7 +109,7 @@ export default function Zgodovina() {
           <button
             className="gumb-sek"
             disabled={stran <= 1}
-            onClick={() => setStran(stran - 1)}
+            onClick={() => zamenjajStran(stran - 1)}
           >
             ← Prejšnja
           </button>
@@ -115,7 +119,7 @@ export default function Zgodovina() {
           <button
             className="gumb-sek"
             disabled={stran >= strani}
-            onClick={() => setStran(stran + 1)}
+            onClick={() => zamenjajStran(stran + 1)}
           >
             Naslednja →
           </button>

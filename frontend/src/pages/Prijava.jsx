@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../AuthContext.jsx'
+import { useAuth } from '../useAuth.js'
 
 export default function Prijava() {
   const { user, prijava } = useAuth()

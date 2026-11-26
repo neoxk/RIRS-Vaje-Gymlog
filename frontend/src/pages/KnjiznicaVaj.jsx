@@ -18,10 +18,6 @@ export default function KnjiznicaVaj() {
   const [napaka, setNapaka] = useState('')
 
   useEffect(() => {
-    setNalaganje(true)
-    setNapaka('')
-    setOdprta(null)
-
     const url = skupina
       ? `/api/vaje?misicnaSkupina=${encodeURIComponent(skupina)}`
       : '/api/vaje'
@@ -36,6 +32,15 @@ export default function KnjiznicaVaj() {
       .finally(() => setNalaganje(false))
   }, [skupina])
 
+  // ob menjavi filtra ponastavimo prikaz, nalaganje pa sproži effect
+  function izberiSkupino(nova) {
+    if (nova === skupina) return
+    setNalaganje(true)
+    setNapaka('')
+    setOdprta(null)
+    setSkupina(nova)
+  }
+
   return (
     <div className="siroka">
       <h1 className="naslov-strani">Knjižnica vaj</h1>
@@ -45,7 +50,7 @@ export default function KnjiznicaVaj() {
           <button
             key={vrednost}
             className={`filter ${skupina === vrednost ? 'aktiven' : ''}`}
-            onClick={() => setSkupina(vrednost)}
+            onClick={() => izberiSkupino(vrednost)}
           >
             {ime}
           </button>

@@ -1,5 +1,5 @@
 import { NavLink, Route, Routes, useNavigate } from 'react-router-dom'
-import { useAuth } from './AuthContext.jsx'
+import { useAuth } from './useAuth.js'
 import ProtectedRoute from './ProtectedRoute.jsx'
 import Registracija from './pages/Registracija.jsx'
 import Prijava from './pages/Prijava.jsx'
