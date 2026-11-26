@@ -64,7 +64,9 @@ jobs:
       - name: Priprava paketov za namestitev
         run: |
           mkdir -p paket/backend paket/frontend
-          cp -r backend/src backend/node_modules backend/package.json backend/package-lock.json paket/backend/
+          cp -r backend/src backend/package.json backend/package-lock.json paket/backend/
+          # railway up izpusti mape node_modules, zato odvisnosti zapakiramo v arhiv
+          tar -czf paket/backend/node_modules.tar.gz -C backend node_modules
           cp deploy/backend/Dockerfile paket/backend/
           cp -r frontend/dist paket/frontend/
           cp deploy/frontend/Dockerfile deploy/frontend/Caddyfile paket/frontend/
