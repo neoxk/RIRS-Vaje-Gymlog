@@ -36,3 +36,50 @@ jobs:
       - name: ESLint (frontend)
         working-directory: frontend
         run: npm run lint
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+    env:
+      MONGODB_TEST_URI: mongodb://127.0.0.1:27017/gymlog-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Namestitev odvisnosti (backend)
+        working-directory: backend
+        run: npm ci
+
+      - name: Namestitev odvisnosti (frontend)
+        working-directory: frontend
+        run: npm ci
+
+      - name: Testi s pokritostjo (backend)
+        working-directory: backend
+        run: npm run test:coverage
+
+      - name: Testi s pokritostjo (frontend)
+        working-directory: frontend
+        run: npm run test:coverage
+
+      - name: Shrani poročilo o pokritosti
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            backend/coverage/
+            frontend/coverage/
+          if-no-files-found: warn
