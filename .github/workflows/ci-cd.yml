@@ -37,6 +37,53 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Gradnja backenda (produkcijske odvisnosti)
+        working-directory: backend
+        run: npm ci --omit=dev
+
+      - name: Gradnja frontenda
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Priprava paketov za namestitev
+        run: |
+          mkdir -p paket/backend paket/frontend
+          cp -r backend/src backend/node_modules backend/package.json backend/package-lock.json paket/backend/
+          cp deploy/backend/Dockerfile paket/backend/
+          cp -r frontend/dist paket/frontend/
+          cp deploy/frontend/Dockerfile deploy/frontend/Caddyfile paket/frontend/
+
+      - name: Shrani backend
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend
+          path: paket/backend/
+          include-hidden-files: true
+          retention-days: 7
+
+      - name: Shrani frontend
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend
+          path: paket/frontend/
+          retention-days: 7
+
   test:
     name: test
     runs-on: ubuntu-latest
@@ -83,3 +130,36 @@ jobs:
             backend/coverage/
             frontend/coverage/
           if-no-files-found: warn
+
+  deploy:
+    name: deploy
+    needs: [lint, build, test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://frontend-production-62175dcd.up.railway.app
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - name: Prenos artefaktov iz joba build
+        uses: actions/download-artifact@v4
+        with:
+          path: paket
+
+      - name: Namestitev Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Namestitev backenda
+        run: railway up paket/backend --path-as-root --service backend --environment production --ci
+
+      - name: Namestitev frontenda
+        run: railway up paket/frontend --path-as-root --service frontend --environment production --ci
+
+      - name: Preverjanje nameščene aplikacije
+        run: |
+          for i in $(seq 1 20); do
+            curl -sf https://frontend-production-62175dcd.up.railway.app/api/health && exit 0
+            sleep 10
+          done
+          exit 1
