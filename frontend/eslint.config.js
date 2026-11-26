@@ -18,4 +18,13 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    files: ['src/test/**/*.{js,jsx}'],
+    languageOptions: {
+      globals: globals.vitest,
+    },
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])

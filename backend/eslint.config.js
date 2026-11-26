@@ -17,4 +17,15 @@ module.exports = defineConfig([
       'prefer-const': 'error',
     },
   },
+  {
+    files: ['tests/**/*.js'],
+    languageOptions: {
+      globals: globals.vitest,
+    },
+  },
+  {
+    files: ['**/*.mjs'],
+    extends: [js.configs.recommended],
+    languageOptions: { sourceType: 'module', globals: globals.node },
+  },
 ]);
